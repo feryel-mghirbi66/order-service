@@ -7,7 +7,6 @@ import com.kubeflux.orderservice.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 public class OrderService {
@@ -31,7 +30,7 @@ public class OrderService {
         Order saved = orderRepository.save(order);
 
         OrderCreatedEvent event = new OrderCreatedEvent(
-            saved.getOrderId(), productId, quantity, customerId
+                saved.getOrderId(), productId, quantity, customerId
         );
         eventProducer.publishOrderCreated(event);
 
@@ -40,9 +39,5 @@ public class OrderService {
 
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
-    }
-
-    public void deleteOrder(UUID orderId) {
-        orderRepository.deleteById(orderId);
     }
 }
