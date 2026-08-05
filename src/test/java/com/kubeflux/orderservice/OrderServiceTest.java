@@ -10,6 +10,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -29,6 +31,7 @@ class OrderServiceTest {
     void createOrder_savesOrderWithCreatedStatus() {
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
             Order o = inv.getArgument(0);
+            o.setOrderId(UUID.randomUUID());
             return o;
         });
 
@@ -37,12 +40,17 @@ class OrderServiceTest {
         assertEquals("laptop-1", result.getProductId());
         assertEquals(2, result.getQuantity());
         assertEquals(Order.OrderStatus.CREATED, result.getStatus());
+        assertNotNull(result.getOrderId());
         verify(eventProducer, times(1)).publishOrderCreated(any());
     }
 
     @Test
     void createOrder_publishesEventAfterSaving() {
-        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
+        when(orderRepository.save(any(Order.class))).thenAnswer(inv -> {
+            Order o = inv.getArgument(0);
+            o.setOrderId(UUID.randomUUID());
+            return o;
+        });
 
         orderService.createOrder("laptop-2", 1, "cust-456");
 
